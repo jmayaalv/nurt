@@ -13,7 +13,6 @@
    [nurt.effect.http :as effect.http]
    [nurt.effect.jms :as effect.jms]))
 
-
 (defmulti command-spec :command/type)
 (s/def :broker/command (s/multi-spec command-spec :command/type))
 
@@ -25,7 +24,7 @@
   into the context rather than performing side effects directly.
 
   Args:
-    broker - The Kane Bus broker instance
+    broker - The Nurt broker instance
     command-key - Keyword identifying the command type (e.g., :user/create)
     handler-fn - Function that processes the command and returns effects
     interceptors - Optional interceptors to apply to command processing
@@ -49,7 +48,7 @@
 (defn create
   "Creates a new Kane Broker instance with pre-configured interceptors.
 
-  The broker is built on Kane Bus and includes the following interceptor chain:
+  The broker is built on Nurt and includes the following interceptor chain:
   - Transformer: Coerces commands using Coax based on command type
   - Logging: Logs command execution at debug level
   - Validator: Validates commands against :broker/command spec
@@ -59,7 +58,7 @@
   and validates them using clojure.spec with enhanced error messages via Lingo.
 
   Returns:
-    A configured Kane Bus broker instance ready for command registration
+    A configured Nurt broker instance ready for command registration
 
   Example:
     (def broker (create))
@@ -78,7 +77,7 @@
                                                       (if (s/valid? :broker/command command)
                                                         [:ok command]
                                                         [:error (ex-info "invalid command"
-                                                                         (lingo/explain-data :broker/command command ))]))})
+                                                                         (lingo/explain-data :broker/command command))]))})
                         (ki/effects {:db      #'effect.db/db!
                                      :jms     #'effect.jms/jms!
                                      :csv     #'effect.csv/csv!
@@ -110,11 +109,10 @@
   [broker effect-type effect-fn]
   (bus/register-effect! broker effect-type effect-fn))
 
-
 (defn execute!
   "Executes a command through the broker's interceptor chain.
 
-  The command is dispatched through Kane Bus using the provided context.
+  The command is dispatched through Nurt using the provided context.
   The broker will apply all registered interceptors (transformation, logging,
   validation, and effects) before executing the command handler.
 

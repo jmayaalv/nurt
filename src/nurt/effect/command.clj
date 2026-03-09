@@ -10,21 +10,21 @@
           :req [:effect/type]))
 
 (defn command
-  "Creates a command effect
+  "Creates a command effect.
 
   Args:
-    command-or-cmmands - Either a single command map or collection of command maps
+    command-or-commands - Either a single command map or collection of command maps
 
   Returns:
     Command effect map with :effect/type :command
 
   Examples:
-    ;; Single message
-    (command {....})
+    ;; Single command
+    (command {:command/type :user/create :name \"Alice\"})
 
-
-    (jms [{...}
-          {....}])"
+    ;; Multiple commands
+    (command [{:command/type :user/create :name \"Alice\"}
+              {:command/type :user/notify :user-id 123}])"
   [command-or-commands]
   (let [commands (if (vector? command-or-commands)
                    command-or-commands
@@ -33,14 +33,13 @@
                   :commands    commands}]
     effect))
 
-
 (defn command!
-  "Executes a command effect by sending the command the the kane broker
+  "Executes a command effect by dispatching commands through the broker.
 
-  This is the effect handler function that performs the actual call .
+  This is the effect handler function that performs the actual dispatch.
 
   Args:
-    effect -  Command effect map containing :commands
+    effect  - Command effect map containing :commands
     context - Execution context containing :broker
 
   Note:

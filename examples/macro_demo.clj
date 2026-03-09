@@ -1,5 +1,5 @@
-(ns macro-demo
-  "Comprehensive demonstration of Kane Bus defcommand macro system.
+(ns nurt.bus.macro-demo
+  "Comprehensive demonstration of Nurt defcommand macro system.
 
   This demo showcases all features of the macro system including:
   - Basic command registration
@@ -163,21 +163,21 @@
 (defn create-demo-broker []
   "Create a broker with all necessary effects configured."
   (bus/in-memory-broker
-    [:command :type]
-    [(i/effects {:log log-effect
-                 :email email-effect
-                 :audit audit-effect
-                 :db-save db-save-effect})]))
+   [:command :type]
+   [(i/effects {:log log-effect
+                :email email-effect
+                :audit audit-effect
+                :db-save db-save-effect})]))
 
 (defn register-all-commands [broker]
   "Register all demo commands to the broker."
   (util/apply-commands broker
-    [hello
-     create-user
-     process-payment
-     admin-action
-     validation-demo
-     backward-compatibility-demo])
+                       [hello
+                        create-user
+                        process-payment
+                        admin-action
+                        validation-demo
+                        backward-compatibility-demo])
   broker)
 
 (defn demo-basic-usage []
@@ -188,8 +188,8 @@
 
     ;; Simple hello command
     (println "Result:"
-      (bus/dispatch broker
-        {:command {:type :hello :name "Alice"}}))))
+             (bus/dispatch broker
+                           {:command {:type :hello :name "Alice"}}))))
 
 (defn demo-coeffects-and-coercion []
   "Demonstrate coeffects and field coercion."
@@ -200,10 +200,10 @@
     ;; User creation with coercion (trimming and lowercasing)
     (println "Creating user with field coercion:")
     (let [result (bus/dispatch broker
-                   {:command {:type :create-user
-                             :name "  John Doe  "  ; Will be trimmed
-                             :email "JOHN@EXAMPLE.COM"  ; Will be lowercased
-                             :age 30}})]
+                               {:command {:type :create-user
+                                          :name "  John Doe  "  ; Will be trimmed
+                                          :email "JOHN@EXAMPLE.COM"  ; Will be lowercased
+                                          :age 30}})]
       (println "Result:" result))))
 
 (defn demo-payment-processing []
@@ -214,9 +214,9 @@
 
     (println "Processing payment:")
     (let [result (bus/dispatch broker
-                   {:command {:type :process-payment
-                             :user-id "user_123"
-                             :amount "99.99"}})]  ; String will be coerced to BigDecimal
+                               {:command {:type :process-payment
+                                          :user-id "user_123"
+                                          :amount "99.99"}})]  ; String will be coerced to BigDecimal
       (println "Result:" result))))
 
 (defn demo-custom-interceptors []
@@ -228,20 +228,20 @@
     ;; Successful admin action
     (println "Successful admin action:")
     (let [result (bus/dispatch broker
-                   {:command {:type :admin-action
-                             :admin-id "admin_1"
-                             :action "delete-user"
-                             :target "user_456"}})]
+                               {:command {:type :admin-action
+                                          :admin-id "admin_1"
+                                          :action "delete-user"
+                                          :target "user_456"}})]
       (println "Result:" result))
 
     ;; Rate limited user (will throw exception)
     (println "\nTrying rate-limited user:")
     (try
       (bus/dispatch broker
-        {:command {:type :admin-action
-                   :admin-id "blocked-user"
-                   :action "some-action"
-                   :target "something"}})
+                    {:command {:type :admin-action
+                               :admin-id "blocked-user"
+                               :action "some-action"
+                               :target "something"}})
       (catch Exception e
         (println "Caught exception:" (.getMessage e))))))
 
@@ -254,20 +254,20 @@
     ;; Valid data
     (println "Valid user data:")
     (let [result (bus/dispatch broker
-                   {:command {:type :validation-demo
-                             :name "Jane Smith"
-                             :email "jane@example.com"
-                             :age 25}})]
+                               {:command {:type :validation-demo
+                                          :name "Jane Smith"
+                                          :email "jane@example.com"
+                                          :age 25}})]
       (println "Result:" result))
 
     ;; Invalid data (will throw validation error)
     (println "\nInvalid user data:")
     (try
       (bus/dispatch broker
-        {:command {:type :validation-demo
-                   :name ""  ; Invalid: empty name
-                   :email "not-an-email"  ; Invalid: bad email format
-                   :age 5}})  ; Invalid: too young
+                    {:command {:type :validation-demo
+                               :name ""  ; Invalid: empty name
+                               :email "not-an-email"  ; Invalid: bad email format
+                               :age 5}})  ; Invalid: too young
       (catch Exception e
         (println "Validation error:" (.getMessage e))
         (println "Error data:" (ex-data e))))))
@@ -290,7 +290,7 @@
 
 (defn demo-complete-workflow []
   "Run all demos in sequence."
-  (println "🚀 Kane Bus Macro System Demo")
+  (println "🚀 Nurt Macro System Demo")
   (println "============================")
 
   (demo-basic-usage)
@@ -348,5 +348,4 @@
 
   ;; 7. Register and use
   (my-custom-command my-broker)
-  (bus/dispatch my-broker {:command {:type :my-custom-command :data "test"}})
-)
+  (bus/dispatch my-broker {:command {:type :my-custom-command :data "test"}}))

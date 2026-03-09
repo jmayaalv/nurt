@@ -19,7 +19,7 @@ A lightweight, composable event bus library for Clojure built on top of the [exo
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {io.github.jmayaalv/nurt {:git/tag "v0.1.0" :git/sha "<sha>"}}}
+{:deps {io.github.jmayaalv/nurt {:git/tag "v0.1.0" :git/sha "40501f3a937dd0c6a87e298e48180abc5a703421"}}}
 ```
 
 ## Quick Start

@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [nurt.effect :as effect]
             [nurt.io.jms :as io-jms]
-            [nurt.effect.command :as effect.commmand]))
+            [nurt.effect.command :as effect.command]))
 
 (s/def ::message map?)
 (s/def ::queue string?)
@@ -28,7 +28,7 @@
   - :properties - Optional message properties (map)
   - :delay - Optional delay in milliseconds for scheduled delivery (positive integer)
 
-  Messages are sent using Kane MQ and are JSON-serialized using charred.
+  Messages are JSON-serialized using charred.
 
   Args:
     message-or-messages - Either a single message map or collection of message maps
@@ -58,13 +58,12 @@
                   :messages    messages}]
     effect))
 
-
 (defn jms!
   "Executes a JMS effect by sending messages to their respective queues.
 
   This is the effect handler function that performs the actual message sending.
-  It's automatically called by the Kane Broker when processing :jms effects.
-  Messages are sent via Kane MQ with JSON serialization and support for
+  It's automatically called by the Nurt broker when processing :jms effects.
+  Messages are sent with JSON serialization and support for
   properties and delayed delivery.
 
   Args:
@@ -83,6 +82,6 @@
     (run! (fn [message]
             (io-jms/send! context message))
           messages)
-    (effect.commmand/command! {:effect/type :command
-                               :commands (map :message messages)}
-                              context)))
+    (effect.command/command! {:effect/type :command
+                              :commands (map :message messages)}
+                             context)))
