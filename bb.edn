@@ -1,0 +1,24 @@
+{:tasks {:requires ([babashka.fs :as fs]
+                    [babashka.process :refer [shell]])
+         :override-builtin true
+
+         clean {:doc "Clean build artifacts"
+                :task (fs/delete-tree "target")}
+
+         test {:doc "Run tests with auto-discovery"
+               :task (shell "clojure -X:test")
+               :depends [clean]}
+
+         ci {:doc "CI pipeline: test + build JAR"
+             :task (shell "clojure -T:build ci")
+             :depends [test]}
+
+         install {:doc "Install JAR locally"
+                  :task (shell "clojure -T:build install")
+                  :depends [ci]}
+
+         nrepl {:doc "Start development REPL"
+                :task (shell "clojure -M:dev:nrepl")}
+
+         javac {:doc "Compile Java sources"
+                :task (shell "clojure -T:build javac")}}}

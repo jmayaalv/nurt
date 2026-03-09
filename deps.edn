@@ -1,0 +1,49 @@
+{:deps
+ {org.clojure/clojure            {:mvn/version "1.12.1"}
+  exoscale/interceptor            {:mvn/version "0.1.17"}
+  org.clojure/tools.logging       {:mvn/version "1.2.4"}
+  org.clojure/spec.alpha          {:mvn/version "0.5.238"}
+
+  ;; Broker dependencies
+  com.github.seancorfield/next.jdbc {:mvn/version "1.3.865"}
+  com.cnuernber/charred           {:mvn/version "1.037"}
+  exoscale/coax                   {:mvn/version "2.0.2"}
+  exoscale/lingo                  {:mvn/version "1.0.5"}
+  hato/hato                       {:mvn/version "0.9.0"}
+  org.apache.commons/commons-email2-jakarta {:mvn/version "2.0.0-M1"}
+  camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}
+  joda-money/joda-money           {:mvn/version "1.0.4"}
+  org.postgresql/postgresql       {:mvn/version "42.7.4"}
+
+  ;; JMS (requires private kane/clj-mq - optional)
+  ;; kane/clj-mq {:mvn/version "2025.05.05"}
+  }
+
+ :paths ["src" "resources"]
+
+ :aliases
+ {:dev
+  {:extra-paths ["dev" "test"]
+   :extra-deps  {org.clojure/tools.namespace    {:mvn/version "1.3.0"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}}}
+
+  :build
+  {:deps       {io.github.seancorfield/build-clj {:git/tag "v0.10.5"
+                                                  :git/sha "12aced2"}}
+   :ns-default build}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {io.github.metabase/hawk        {:mvn/version "1.0.7"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}
+                 clj-kondo/clj-kondo            {:mvn/version "2026.01.19"}}
+   :exec-fn     mb.hawk.core/find-and-run-tests-cli
+   :exec-args   {:exclude-directories [".clj-kondo" "resources"]}}
+
+  :nrepl
+  {:extra-paths ["test"]
+   :extra-deps  {nrepl/nrepl {:mvn/version "1.3.1"}}
+   :jvm-opts    ["-Djdk.attach.allowAttachSelf"]
+   :main-opts   ["-m" "nrepl.cmdline" "--port" "7888"]}}}

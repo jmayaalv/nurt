@@ -1,0 +1,6 @@
+/target
+/.cpcache
+/.lsp
+*.jar
+*.class
+.DS_Store
