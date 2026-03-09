@@ -1,21 +1,21 @@
 {:deps
- {org.clojure/clojure            {:mvn/version "1.12.1"}
-  exoscale/interceptor            {:mvn/version "0.1.17"}
-  org.clojure/tools.logging       {:mvn/version "1.2.4"}
-  org.clojure/spec.alpha          {:mvn/version "0.5.238"}
+ {org.clojure/clojure                      {:mvn/version "1.12.1"}
+  exoscale/interceptor                      {:mvn/version "0.1.17"}
+  org.clojure/tools.logging                 {:mvn/version "1.2.4"}
+  org.clojure/spec.alpha                    {:mvn/version "0.5.238"}
 
-  ;; Broker dependencies
-  com.github.seancorfield/next.jdbc {:mvn/version "1.3.865"}
-  com.cnuernber/charred           {:mvn/version "1.037"}
-  exoscale/coax                   {:mvn/version "2.0.2"}
-  exoscale/lingo                  {:mvn/version "1.0.5"}
-  hato/hato                       {:mvn/version "0.9.0"}
+  ;; Broker
+  com.github.seancorfield/next.jdbc         {:mvn/version "1.3.865"}
+  com.cnuernber/charred                     {:mvn/version "1.037"}
+  exoscale/coax                             {:mvn/version "2.0.2"}
+  exoscale/lingo                            {:mvn/version "1.0.5"}
+  hato/hato                                 {:mvn/version "0.9.0"}
   org.apache.commons/commons-email2-jakarta {:mvn/version "2.0.0-M1"}
-  camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}
-  joda-money/joda-money           {:mvn/version "1.0.4"}
-  org.postgresql/postgresql       {:mvn/version "42.7.4"}
+  camel-snake-kebab/camel-snake-kebab       {:mvn/version "0.4.2"}
+  joda-money/joda-money                     {:mvn/version "1.0.4"}
+  org.postgresql/postgresql                 {:mvn/version "42.7.4"}
 
-  ;; JMS (requires private kane/clj-mq - optional)
+  ;; JMS - requires kane/clj-mq (private). Comment out if not needed.
   ;; kane/clj-mq {:mvn/version "2025.05.05"}
   }
 

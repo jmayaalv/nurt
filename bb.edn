@@ -5,7 +5,7 @@
          clean {:doc "Clean build artifacts"
                 :task (fs/delete-tree "target")}
 
-         test {:doc "Run tests with auto-discovery"
+         test {:doc "Run tests"
                :task (shell "clojure -X:test")
                :depends [clean]}
 
@@ -18,7 +18,4 @@
                   :depends [ci]}
 
          nrepl {:doc "Start development REPL"
-                :task (shell "clojure -M:dev:nrepl")}
-
-         javac {:doc "Compile Java sources"
-                :task (shell "clojure -T:build javac")}}}
+                :task (shell "clojure -M:dev:nrepl")}}}

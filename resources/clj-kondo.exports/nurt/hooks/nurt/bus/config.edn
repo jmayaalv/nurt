@@ -1,0 +1,1 @@
+{:hooks {:analyze-call {nurt.bus.macro/defcommand hooks.nurt.bus.macro/defcommand-hook}}}

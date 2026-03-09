@@ -12,14 +12,14 @@
 
 (defn jar [opts]
   (b/write-pom {:class-dir class-dir
-                :lib lib
-                :version version
-                :basis @basis
-                :src-dirs ["src"]})
-  (b/copy-dir {:src-dirs ["src" "resources"]
+                :lib       lib
+                :version   version
+                :basis     @basis
+                :src-dirs  ["src"]})
+  (b/copy-dir {:src-dirs   ["src" "resources"]
                :target-dir class-dir})
   (b/jar {:class-dir class-dir
-          :jar-file jar-file})
+          :jar-file  jar-file})
   opts)
 
 (defn ci [opts]
@@ -28,9 +28,9 @@
 
 (defn install [opts]
   (ci opts)
-  (b/install {:basis @basis
-              :lib lib
-              :version version
-              :jar-file jar-file
+  (b/install {:basis     @basis
+              :lib       lib
+              :version   version
+              :jar-file  jar-file
               :class-dir class-dir})
   opts)
