@@ -18,7 +18,6 @@
   (s/keys :req-un [::statements]
           :req [:effect/type]))
 
-
 (defn db
   "Creates a database effect for executing SQL statements within a transaction.
 
@@ -57,7 +56,7 @@
   "Executes a database effect by running SQL statements within a transaction.
 
   This is the effect handler function that performs the actual database operations.
-  It's automatically called by the Kane Broker when processing :db effects.
+  It's automatically called by the Nurt broker when processing :db effects.
   All statements are executed within a single transaction - if any statement fails,
   the entire transaction is rolled back.
 
@@ -71,7 +70,10 @@
   Note:
     This function is typically not called directly. It's registered as an effect
     handler in the broker and called automatically during command processing."
-  [{:keys [statements]} {:keys [db]}]
+  [{:keys [statements]} {:keys [db] :as context}]
+  (when-not db
+    (throw (ex-info "Missing :db in context. Ensure a database datasource is provided."
+                    {:context-keys (keys context)})))
   (jdbc/with-transaction [tx db]
     (run! (fn [statement]
             (log/debug "Executing: " statement)

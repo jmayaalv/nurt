@@ -1,5 +1,5 @@
 (ns nurt.internal.json
-  "Internal JSON abstraction layer for Kane Broker.
+  "Internal JSON abstraction layer for Nurt.
   
   This namespace provides a unified interface for JSON operations, abstracting
   the underlying JSON library implementation. This makes it easier to change

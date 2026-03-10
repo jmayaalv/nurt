@@ -6,7 +6,7 @@
 (def executed-effects (atom []))
 
 (defn demo-complete-pipeline []
-  (println "=== Kane Bus Complete Pipeline Demo ===\n")
+  (println "=== Nurt Complete Pipeline Demo ===\n")
 
   ;; Reset effects tracking
   (reset! executed-effects [])

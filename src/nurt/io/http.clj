@@ -45,16 +45,20 @@
   [response {:keys [key-fn]}]
   (let [{:keys [body headers]} response
         content-type (or (get headers "content-type")
-                        (get headers "Content-Type"))]
+                         (get headers "Content-Type"))]
     (if (and (string? body)
              content-type
              (.contains (str content-type) "application/json"))
       (try
         (assoc response :body (if key-fn
-                               (json/read-str body :key-fn key-fn)
-                               (json/read-str body)))
-        (catch Exception _
-          response))
+                                (json/read-str body :key-fn key-fn)
+                                (json/read-str body)))
+        (catch Exception e
+          (throw (ex-info "Failed to parse JSON response body"
+                          {:content-type content-type
+                           :body body
+                           :cause (.getMessage e)}
+                          e))))
       response)))
 
 (defn parse-json

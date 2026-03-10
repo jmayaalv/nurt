@@ -30,14 +30,14 @@
 
   Parameters:
   - key - Keyword to add to the context
-  - value-fn - Function that receives context and returns the value to add
+  - value-fn - Function or var that receives context and returns the value to add
 
   Examples:
   (coeffect :now (fn [ctx] (java.util.Date.)))
   (coeffect :timestamp (fn [ctx] (System/currentTimeMillis)))
   (coeffect :user-id (fn [ctx] (get-in ctx [:session :user-id])))"
   [key value-fn]
-  {:pre [(keyword? key) (fn? value-fn)]}
+  {:pre [(keyword? key) (or (fn? value-fn) (var? value-fn))]}
   {:name (keyword (str (name ::coeffect) "/" (if (namespace key)
                                                (str (namespace key) "/" (name key))
                                                (name key))))
@@ -99,7 +99,6 @@
                 ctx
                 (i/error ctx data))))})
 
-
 (defn- missing-effects
   [effect-type->fn effects]
   (reduce (fn [missing effect]
@@ -108,8 +107,6 @@
               missing))
           {}
           effects))
-
-(defonce effect-type-fn+ (atom {}))
 
 (defn- get-effect-fn
   [effect-type-fn effect-type]
@@ -121,7 +118,14 @@
 (defn effects
   "Creates an effects interceptor that processes handler return values and executes effects.
 
-  Handler should return: [:ok result effects] or [:error errors]
+  Each call creates an isolated effect registry — multiple broker instances do not
+  share effect registrations, preventing cross-test and cross-broker contamination.
+
+  The interceptor map exposes a :registry+ atom so additional effects can be
+  registered after creation via nurt.bus/register-effect!.
+
+  Handler should return: [:ok result effects] or [:error error-data]
+  On :error the pipeline is stopped and no effects are executed.
 
   Parameters:
   - effect-fns - Map of effect keywords to functions that execute the effect
@@ -132,56 +136,52 @@
             :email (fn [effect ctx] (send-email (:to effect) (:body effect)))})"
   [effect-fns]
   {:pre [(map? effect-fns)]}
-  (swap! effect-type-fn+ into effect-fns)
-
-
-  {:name  ::effects
-   :leave (fn [ctx]
-            (let [result (get ctx :response)]
-              (try
-                (if (vector? result)
-                  (condp = (first result)
-                    :ok    (let [[_ data effects] result
-                                 missing          (missing-effects @effect-type-fn+ effects)]
-                             (if (seq missing)
-                               (i/error ctx (ex-info "There are effects without handler. " missing))
-                               (do (run! (fn [effect]
-                                           (if-let [effect-fn (get-effect-fn @effect-type-fn+ (:effect/type effect))]
-                                             (do (log/debug "Executing effect" effect)
-                                                 (effect-fn effect ctx))
-                                             (log/warn "no effect fn registered. " effect)))
-                                         effects)
-                                   (assoc ctx :response data))))
-                    :error (let [[_ error effects] result
-                                 missing           (missing-effects @effect-type-fn+ effects)]
-                             (if (seq missing)
-                               (i/error ctx (ex-info "There are effects without handler. " missing))
-                               (do (run! (fn [effect]
-                                           (if-let [effect-fn (get-effect-fn @effect-type-fn+ (:effect/type effect))]
-                                             (do (log/debug "Executing effect" effect)
-                                                 (effect-fn effect ctx))
-                                             (log/warn "no effect fn registered. " effect)))
-                                         effects)
-                                   (i/error ctx error))))
-                    :else  (i/error ctx (ex-info "invalid handler response" result)))
-                  ctx)
-                (catch Exception e
-                  (i/error ctx e)))))})
+  (let [registry+ (atom effect-fns)]
+    {:name      ::effects
+     :registry+ registry+
+     :leave     (fn [ctx]
+                  (let [result (get ctx :response)]
+                    (try
+                      (if (vector? result)
+                        (condp = (first result)
+                          :ok    (let [[_ data effects] result
+                                       missing          (missing-effects @registry+ effects)]
+                                   (if (seq missing)
+                                     (i/error ctx (ex-info "Effects without registered handler" missing))
+                                     (do (run! (fn [effect]
+                                                 (if-let [effect-fn (get-effect-fn @registry+ (:effect/type effect))]
+                                                   (do (log/debug "Executing effect" effect)
+                                                       (effect-fn effect ctx))
+                                                   (log/warn "No effect fn registered for" effect)))
+                                               effects)
+                                         (assoc ctx :response data))))
+                          :error (let [[_ error] result]
+                                   (i/error ctx error))
+                          (i/error ctx (ex-info "Invalid handler response" {:response result})))
+                        ctx)
+                      (catch Exception e
+                        (i/error ctx e)))))}))
 
 (defn register-effect!
-  "Creates a single effect interceptor that processes a specific effect type.
+  "Registers an additional effect handler with an existing effects interceptor.
 
   Parameters:
-  - effect-type - Keyword identifying the effect type to handle
-  - effect-fn - Function that processes the effect, receives (effect ctx)
+  - effects-interceptor - The interceptor map returned by (effects {...})
+  - effect-type         - Keyword identifying the effect type to handle
+  - effect-fn           - Function or var that processes the effect, receives (effect ctx)
+
+  Returns the effects-interceptor (for threading).
 
   Examples:
-  (effect :send-email (fn [effect ctx] (send-email (:to effect) (:body effect))))
-  (effect :log (fn [effect ctx] (println (:message effect))))"
-  [effect-type effect-fn]
-  {:pre [(keyword? effect-type)
+  (register-effect! effects-int :send-email (fn [effect ctx] (send-email (:to effect) (:body effect))))
+  (register-effect! effects-int :log #'my-log-handler)"
+  [effects-interceptor effect-type effect-fn]
+  {:pre [(map? effects-interceptor)
+         (:registry+ effects-interceptor)
+         (keyword? effect-type)
          (or (fn? effect-fn) (var? effect-fn))]}
-  (swap! effect-type-fn+ assoc effect-type effect-fn))
+  (swap! (:registry+ effects-interceptor) assoc effect-type effect-fn)
+  effects-interceptor)
 
 ;;; =============================================================================
 ;;; Helper Functions Using Existing Interceptors

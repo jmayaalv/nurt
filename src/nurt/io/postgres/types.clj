@@ -8,7 +8,6 @@
   (:import
    [java.util UUID]
    [java.sql PreparedStatement]
-   [org.joda.money CurrencyUnit]
    [org.postgresql.util PGobject]))
 
 ;; :decode-key-fn here specifies that JSON-keys will become keywords:
@@ -63,14 +62,20 @@
   (set-parameter [^clojure.lang.Keyword v ^PreparedStatement s ^long i]
     (.setString s i (str v)))
 
-  CurrencyUnit
-  (set-parameter [^CurrencyUnit v ^PreparedStatement s ^long i]
-    (.setString s i (.getCode v)))
-
   UUID
   (set-parameter [^UUID v ^PreparedStatement s ^long i]
-    (.setString s i  (str v)))
-  )
+    (.setString s i (str v))))
+
+;; Conditionally extend SettableParameter for joda-money CurrencyUnit
+;; if the library is present on the classpath. Add joda-money/joda-money
+;; to your project dependencies to enable this coercion.
+(try
+  (let [cu-class (Class/forName "org.joda.money.CurrencyUnit")]
+    (extend cu-class
+      p/SettableParameter
+      {:set-parameter (fn [v ^PreparedStatement s i]
+                        (.setString s i (.getCode v)))}))
+  (catch ClassNotFoundException _))
 
 (extend-protocol rs/ReadableColumn
   String
@@ -83,7 +88,6 @@
     (<-pgobject v))
   (read-column-by-index [^org.postgresql.util.PGobject v _2 _3]
     (<-pgobject v)))
-
 
 ;;;  read dates as java local date/time
 (jdbc.date-time/read-as-local)

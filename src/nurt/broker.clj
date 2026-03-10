@@ -10,8 +10,7 @@
    [nurt.effect.db :as effect.db]
    [nurt.effect.email :as effect.email]
    [nurt.effect.command :as effect.command]
-   [nurt.effect.http :as effect.http]
-   [nurt.effect.jms :as effect.jms]))
+   [nurt.effect.http :as effect.http]))
 
 (defmulti command-spec :command/type)
 (s/def :broker/command (s/multi-spec command-spec :command/type))
@@ -46,7 +45,7 @@
                     handler-fn))
 
 (defn create
-  "Creates a new Kane Broker instance with pre-configured interceptors.
+  "Creates a new Nurt broker instance with pre-configured interceptors.
 
   The broker is built on Nurt and includes the following interceptor chain:
   - Transformer: Coerces commands using Coax based on command type
@@ -79,7 +78,6 @@
                                                         [:error (ex-info "invalid command"
                                                                          (lingo/explain-data :broker/command command))]))})
                         (ki/effects {:db      #'effect.db/db!
-                                     :jms     #'effect.jms/jms!
                                      :csv     #'effect.csv/csv!
                                      :http    #'effect.http/http!
                                      :email   #'effect.email/email!

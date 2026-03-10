@@ -83,7 +83,7 @@
     Returns:
     Interceptor or nil if not found
 
-    Examnple:
+    Example:
     (interceptor broker :db)"))
 
 (defrecord InMemoryBroker [interceptors+ router+ dispatch-path]
@@ -96,12 +96,12 @@
       (log/trace event)
       (log/debug "Executing event of type:" event-type)
       (if (nil? handler)
-         (throw (ex-info "No handler registered for event type"
-                         {:path  dispatch-path
-                          :event event-type}))
-         (let [pipeline (concat @interceptors+ interceptors [handler])
-               ctx      (i/execute event pipeline)]
-           (:response ctx)))))
+        (throw (ex-info "No handler registered for event type"
+                        {:path  dispatch-path
+                         :event event-type}))
+        (let [pipeline (concat @interceptors+ interceptors [handler])
+              ctx      (i/execute event pipeline)]
+          (:response ctx)))))
 
   ;; Add handler with no handler-specific interceptors
   (add-handler! [this event-type inject-path handler-fn]
@@ -117,8 +117,8 @@
                                     (assoc ctx
                                            :response
                                            (if (fn? handler-fn)
-                                                  (handler-fn (select-keys ctx inject-path))
-                                                  ((deref handler-fn) (select-keys ctx inject-path)))))}
+                                             (handler-fn (select-keys ctx inject-path))
+                                             ((deref handler-fn) (select-keys ctx inject-path)))))}
             :interceptors interceptors})
     this)
 
@@ -128,8 +128,8 @@
   (interceptor [_ id]
     (->> @interceptors+
          (keep (fn [interceptor]
-               (when (= (:name interceptor) id)
-                 interceptor)))
+                 (when (= (:name interceptor) id)
+                   interceptor)))
          first)))
 
 (defn in-memory-broker
@@ -182,27 +182,32 @@
                      dispatch-key)))
 
 (defn register-effect!
-  "Registers an effect processor as a bus-level leave interceptor.
+  "Registers an additional effect handler with the broker's effects interceptor.
 
-  Effect processors run during the leave phase of the interceptor pipeline,
-  allowing them to process effects from handler return values.
+  The broker must have been created with an (nurt.bus.interceptor/effects {...})
+  interceptor in its pipeline. This finds that interceptor and adds the new
+  effect type to its isolated registry.
 
   Parameters:
-  - broker: InMemoryBroker instance
+  - broker:      InMemoryBroker instance
   - effect-type: Keyword identifying the effect type to handle
-  - effect-fn: Function that processes the effect. Receives (effect ctx) as arguments
-
-  The effect processor will be called for effects matching the effect-type
-  found in handler responses of the form [:ok result effects].
+  - effect-fn:   Function or var that processes the effect. Receives (effect ctx)
 
   Returns:
   The broker instance (for chaining).
+
+  Throws:
+  ExceptionInfo if no effects interceptor is found in the broker's pipeline.
 
   Example:
   (register-effect! broker :send-email
     (fn [effect ctx]
       (send-email (:to effect) (:subject effect) (:body effect))))"
   [broker effect-type effect-fn]
-  (let [effect-interceptor (interceptor/register-effect! effect-type effect-fn)]
-    (swap! (:interceptors+ broker) conj effect-interceptor)
-    broker))
+  (if-let [effects-int (->> @(:interceptors+ broker)
+                            (filter #(= (:name %) ::interceptor/effects))
+                            first)]
+    (do (interceptor/register-effect! effects-int effect-type effect-fn)
+        broker)
+    (throw (ex-info "No effects interceptor found in broker. Create the broker with (nurt.bus.interceptor/effects {...})."
+                    {:effect-type effect-type}))))

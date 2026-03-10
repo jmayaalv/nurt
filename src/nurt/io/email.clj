@@ -71,7 +71,7 @@
                            :description \"Monthly Sales Report\"}]})"
   [context {:keys [to from subject html-body text-body cc bcc attachments] :as smtp}]
   (let [{:keys [smtp-host smtp-port username password ssl tls]
-         :or {smtp-port 587 ssl false tls true} :as x} (merge context smtp)
+         :or {smtp-port 587 ssl false tls true}} (merge context smtp)
         email (HtmlEmail.)]
     ;; Configure SMTP settings
     (.setHostName email smtp-host)

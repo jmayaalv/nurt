@@ -94,7 +94,7 @@
   "Executes an email effect by sending the specified email.
   
   This is the effect handler function that performs the actual email sending.
-  It's automatically called by the Kane Broker when processing :email effects.
+  It's automatically called by the Nurt broker when processing :email effects.
   The context must contain SMTP configuration.
   
   Args:

@@ -9,7 +9,7 @@
 (s/def ::path string?)
 
 (s/def ::output-stream
-  #(or (instance? java.io.OutputStream %) 
+  #(or (instance? java.io.OutputStream %)
        (instance? java.io.Writer %)))
 
 (s/def ::headers boolean?)
@@ -67,7 +67,7 @@
   "Executes a CSV effect by writing data to the specified destination.
   
   This is the effect handler function that performs the actual CSV writing.
-  It's automatically called by the Kane Broker when processing :csv effects.
+  It's automatically called by the Nurt broker when processing :csv effects.
   
   Args:
     effect - CSV effect map containing :csv-data

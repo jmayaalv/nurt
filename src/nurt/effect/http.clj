@@ -32,7 +32,7 @@
 
 (s/def ::http-request
   (s/keys :req-un [::method ::url]
-          :opt-un [::headers ::query-params ::body ::form-params 
+          :opt-un [::headers ::query-params ::body ::form-params
                    ::as ::timeout ::throw-exceptions ::parse-json? ::key-fn]))
 
 (defmethod effect/effect-spec :http [_]
@@ -96,7 +96,7 @@
   "Executes an HTTP effect by making the specified HTTP request.
   
   This is the effect handler function that performs the actual HTTP request.
-  It's automatically called by the Kane Broker when processing :http effects.
+  It's automatically called by the Nurt broker when processing :http effects.
   
   Args:
     effect - HTTP effect map containing :http-request

@@ -8,16 +8,12 @@
   com.github.seancorfield/next.jdbc         {:mvn/version "1.3.865"}
   com.cnuernber/charred                     {:mvn/version "1.037"}
   exoscale/coax                             {:mvn/version "2.0.2"}
-  exoscale/lingo                            {:mvn/version "1.0.5"}
+  com.exoscale/lingo                        {:mvn/version "1.0.5"}
   hato/hato                                 {:mvn/version "0.9.0"}
   org.apache.commons/commons-email2-jakarta {:mvn/version "2.0.0-M1"}
   camel-snake-kebab/camel-snake-kebab       {:mvn/version "0.4.2"}
-  joda-money/joda-money                     {:mvn/version "1.0.4"}
-  org.postgresql/postgresql                 {:mvn/version "42.7.4"}
-
-  ;; JMS - requires kane/clj-mq (private). Comment out if not needed.
-  ;; kane/clj-mq {:mvn/version "2025.05.05"}
-  }
+  ;; Optional: add joda-money/joda-money {:mvn/version "1.0.4"} to enable CurrencyUnit coercion in nurt.io.postgres.types
+  org.postgresql/postgresql                 {:mvn/version "42.7.4"}}
 
  :paths ["src" "resources"]
 
@@ -38,7 +34,8 @@
    :extra-deps  {io.github.metabase/hawk        {:mvn/version "1.0.7"}
                  ch.qos.logback/logback-classic {:mvn/version "1.5.17"
                                                  :exclusions [org.slf4j/slf4j-api]}
-                 clj-kondo/clj-kondo            {:mvn/version "2026.01.19"}}
+                 clj-kondo/clj-kondo            {:mvn/version "2026.01.19"}
+                 com.h2database/h2              {:mvn/version "2.3.232"}}
    :exec-fn     mb.hawk.core/find-and-run-tests-cli
    :exec-args   {:exclude-directories [".clj-kondo" "resources"]}}
 
