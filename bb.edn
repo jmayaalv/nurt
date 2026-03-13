@@ -2,20 +2,81 @@
                     [babashka.process :refer [shell]])
          :override-builtin true
 
-         clean {:doc "Clean build artifacts"
-                :task (fs/delete-tree "target")}
+         test-core   {:doc  "Run nurt-core tests"
+                      :task (shell {:dir "modules/nurt-core"}  "clojure -X:test")}
+         test-db     {:doc  "Run nurt-db tests"
+                      :task (shell {:dir "modules/nurt-db"}    "clojure -X:test")}
+         test-http   {:doc  "Run nurt-http tests"
+                      :task (shell {:dir "modules/nurt-http"}  "clojure -X:test")}
+         test-email  {:doc  "Run nurt-email tests"
+                      :task (shell {:dir "modules/nurt-email"} "clojure -X:test")}
+         test-csv    {:doc  "Run nurt-csv tests"
+                      :task (shell {:dir "modules/nurt-csv"}   "clojure -X:test")}
+         test-broker {:doc  "Run nurt-broker tests"
+                      :task (shell {:dir "modules/nurt-broker"} "clojure -X:test")}
+         test-async  {:doc  "Run nurt-async tests"
+                      :task (shell {:dir "modules/nurt-async"} "clojure -X:test")}
 
-         test {:doc "Run tests"
-               :task (shell "clojure -X:test")
-               :depends [clean]}
+         clean {:doc  "Clean all build artifacts"
+                :task (doseq [dir ["."
+                                   "modules/nurt-core"
+                                   "modules/nurt-db"
+                                   "modules/nurt-http"
+                                   "modules/nurt-email"
+                                   "modules/nurt-csv"
+                                   "modules/nurt-broker"
+                                   "modules/nurt-async"]]
+                        (fs/delete-tree (str dir "/target")))}
 
-         ci {:doc "CI pipeline: test + build JAR"
-             :task (shell "clojure -T:build ci")
-             :depends [test]}
+         test {:doc     "Run all module tests"
+               :depends [test-core test-db test-http test-email test-csv test-broker test-async]
+               :task    (println "All module tests complete.")}
 
-         install {:doc "Install JAR locally"
-                  :task (shell "clojure -T:build install")
-                  :depends [ci]}
+         install-core   {:doc  "Install nurt-core to local Maven"
+                         :task (shell {:dir "modules/nurt-core"}   "clojure -T:build install")}
+         install-db     {:doc     "Install nurt-db to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-db"}     "clojure -T:build install")}
+         install-http   {:doc     "Install nurt-http to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-http"}   "clojure -T:build install")}
+         install-email  {:doc     "Install nurt-email to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-email"}  "clojure -T:build install")}
+         install-csv    {:doc     "Install nurt-csv to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-csv"}    "clojure -T:build install")}
+         install-broker {:doc     "Install nurt-broker to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-broker"} "clojure -T:build install")}
+         install-async  {:doc     "Install nurt-async to local Maven"
+                         :depends [install-core]
+                         :task    (shell {:dir "modules/nurt-async"} "clojure -T:build install")}
 
-         nrepl {:doc "Start development REPL"
-                :task (shell "clojure -M:dev:nrepl")}}}
+         install {:doc "Build and install all modules to local Maven" :depends [install-broker install-async]}
+         ci      {:doc "Full CI: test + install"                      :depends [test install]}
+
+         deploy-core   {:doc  "Deploy nurt-core to Clojars"
+                        :task (shell {:dir "modules/nurt-core"}   "clojure -T:build deploy")}
+         deploy-db     {:doc     "Deploy nurt-db to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-db"}     "clojure -T:build deploy")}
+         deploy-http   {:doc     "Deploy nurt-http to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-http"}   "clojure -T:build deploy")}
+         deploy-email  {:doc     "Deploy nurt-email to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-email"}  "clojure -T:build deploy")}
+         deploy-csv    {:doc     "Deploy nurt-csv to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-csv"}    "clojure -T:build deploy")}
+         deploy-broker {:doc     "Deploy nurt-broker to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-broker"} "clojure -T:build deploy")}
+         deploy-async  {:doc     "Deploy nurt-async to Clojars"
+                        :depends [deploy-core]
+                        :task    (shell {:dir "modules/nurt-async"} "clojure -T:build deploy")}
+         deploy        {:doc     "Deploy all modules to Clojars"
+                        :depends [deploy-db deploy-http deploy-email deploy-csv deploy-broker deploy-async]}
+         nrepl   {:doc "Start dev REPL (all modules)"
+                  :task (shell "clojure -M:dev:nrepl")}}}

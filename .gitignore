@@ -1,6 +1,7 @@
-/target
-/.cpcache
-/.lsp
+target
+.cpcache
+.lsp
 *.jar
 *.class
 .DS_Store
+.clj-kondo

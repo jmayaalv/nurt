@@ -1,0 +1,34 @@
+{:deps {org.clojure/clojure                    {:mvn/version "1.12.1"}
+        nurt/nurt-core                          {:local/root "../nurt-core"}
+        com.github.seancorfield/next.jdbc       {:mvn/version "1.3.865"}
+        org.postgresql/postgresql               {:mvn/version "42.7.4"}
+        camel-snake-kebab/camel-snake-kebab     {:mvn/version "0.4.2"}
+        exoscale/coax                           {:mvn/version "2.0.2"}}
+
+ :paths ["src"]
+
+ :aliases
+ {:dev
+  {:extra-paths ["test"]
+   :extra-deps  {org.clojure/tools.namespace    {:mvn/version "1.3.0"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}}}
+
+  :build
+  {:deps       {io.github.seancorfield/build-clj {:git/tag "v0.10.5"
+                                                  :git/sha "12aced2"}
+                slipset/deps-deploy              {:mvn/version "0.2.2"}}
+   :ns-default build}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {io.github.metabase/hawk        {:mvn/version "1.0.7"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}
+                 com.h2database/h2              {:mvn/version "2.3.232"}}
+   :exec-fn     mb.hawk.core/find-and-run-tests-cli
+   :exec-args   {:exclude-directories [".clj-kondo" "resources"]}}
+
+  :nrepl
+  {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}}
+   :main-opts  ["-m" "nrepl.cmdline" "--port" "7888"]}}}

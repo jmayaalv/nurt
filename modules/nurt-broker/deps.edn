@@ -1,0 +1,39 @@
+{:deps {org.clojure/clojure  {:mvn/version "1.12.1"}
+        nurt/nurt-core        {:local/root "../nurt-core"}
+        exoscale/coax         {:mvn/version "2.0.2"}
+        com.exoscale/lingo    {:mvn/version "1.0.5"}}
+
+ :paths ["src" "resources"]
+
+ :aliases
+ {:dev
+  {:extra-paths ["test"]
+   :extra-deps  {org.clojure/tools.namespace    {:mvn/version "1.3.0"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}}}
+
+  :build
+  {:deps       {io.github.seancorfield/build-clj {:git/tag "v0.10.5"
+                                                  :git/sha "12aced2"}
+                slipset/deps-deploy              {:mvn/version "0.2.2"}}
+   :ns-default build}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {io.github.metabase/hawk        {:mvn/version "1.0.7"}
+                 ch.qos.logback/logback-classic {:mvn/version "1.5.17"
+                                                 :exclusions [org.slf4j/slf4j-api]}
+                 clj-kondo/clj-kondo            {:mvn/version "2026.01.19"}
+                 ;; I/O modules needed only for effect_test.clj (not production deps)
+                 nurt/nurt-db                   {:local/root "../nurt-db"}
+                 nurt/nurt-http                 {:local/root "../nurt-http"}
+                 nurt/nurt-email                {:local/root "../nurt-email"}
+                 nurt/nurt-csv                  {:local/root "../nurt-csv"}
+                 nurt/nurt-async                {:local/root "../nurt-async"}
+                 com.h2database/h2              {:mvn/version "2.3.232"}}
+   :exec-fn     mb.hawk.core/find-and-run-tests-cli
+   :exec-args   {:exclude-directories [".clj-kondo" "resources"]}}
+
+  :nrepl
+  {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}}
+   :main-opts  ["-m" "nrepl.cmdline" "--port" "7888"]}}}
