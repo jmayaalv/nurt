@@ -53,7 +53,7 @@
                          :depends [install-core]
                          :task    (shell {:dir "modules/nurt-async"} "clojure -T:build install")}
 
-         install {:doc "Build and install all modules to local Maven" :depends [install-broker install-async]}
+         install {:doc "Build and install all modules to local Maven" :depends [install-db install-http install-email install-csv install-broker install-async]}
          ci      {:doc "Full CI: test + install"                      :depends [test install]}
 
          deploy-core   {:doc  "Deploy nurt-core to Clojars"

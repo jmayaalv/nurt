@@ -5,22 +5,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-bb nrepl       # Start nREPL server on port 7888
-bb test        # Run all tests (clean first)
-bb ci          # Full CI: test + build JAR
-bb install     # Build and install JAR to local Maven repo
-bb clean       # Remove build artifacts
+bb nrepl        # Start dev nREPL (all modules) on port 7888
+bb test         # Run all module tests
+bb ci           # Full CI: test + install all modules
+bb install      # Build and install all modules to local Maven
+bb clean        # Remove all build artifacts
+bb deploy       # Deploy all modules to Clojars
 ```
 
-Run tests directly:
+Per-module test tasks (each module has its own `deps.edn`):
 ```bash
+bb test-core    # nurt-core
+bb test-broker  # nurt-broker
+bb test-db      # nurt-db
+bb test-http    # nurt-http
+bb test-email   # nurt-email
+bb test-csv     # nurt-csv
+bb test-async   # nurt-async
+```
+
+Run tests directly inside a module directory:
+```bash
+cd modules/nurt-core
 clojure -X:test
 ```
 
-Run a single test namespace:
+Run a single test namespace inside a module:
 ```bash
 clojure -X:test :nses '[nurt.bus-test]'
 ```
+
+## Monorepo Structure
+
+This is a multi-module monorepo. Each module under `modules/` is an independent library with its own `deps.edn` and test suite. The root `deps.edn` aggregates all modules except `nurt-async` (which is optional/standalone).
+
+| Module | Description |
+|---|---|
+| `nurt-core` | Core bus, interceptors, effect protocol |
+| `nurt-broker` | Pre-configured broker, `defcommand` macro, bulk registration utils |
+| `nurt-async` | Async job queue effect (Postgres-backed) |
+| `nurt-db` | DB effect/IO (next.jdbc) |
+| `nurt-http` | HTTP effect/IO (hato) |
+| `nurt-email` | Email effect/IO (Apache Commons Email) |
+| `nurt-csv` | CSV effect/IO (charred) |
 
 ## Architecture
 
@@ -44,7 +71,7 @@ dispatch(event) → bus interceptors → handler interceptors → handler fn →
 
 **`nurt.broker`** — Pre-configured broker with a standard interceptor chain (transformer → logging → validator → effects) and all built-in effects pre-registered. Entry point for most applications.
 
-**`nurt.effect.*`** — Effect constructors (return effect maps) and executors (registered as interceptors). Built-in effects: `:db`, `:http`, `:email`, `:csv`, `:jms`, `:command`.
+**`nurt.effect.*`** — Effect constructors (return effect maps) and executors (registered as interceptors). Built-in effects: `:db`, `:http`, `:email`, `:csv`, `:jms`, `:command`, `:async`.
 
 **`nurt.io.*`** — Low-level I/O wrappers: next.jdbc (`:db`), hato (`:http`), Apache Commons Email (`:email`), charred (`:csv`), JMS (`:jms`).
 
