@@ -8,7 +8,7 @@
   com.github.seancorfield/next.jdbc         {:mvn/version "1.3.865"}
   com.cnuernber/charred                     {:mvn/version "1.037"}
   exoscale/coax                             {:mvn/version "2.0.2"}
-  exoscale/lingo                            {:mvn/version "1.0.5"}
+  com.exoscale/lingo                        {:mvn/version "1.0.5"}
   hato/hato                                 {:mvn/version "0.9.0"}
   org.apache.commons/commons-email2-jakarta {:mvn/version "2.0.0-M1"}
   camel-snake-kebab/camel-snake-kebab       {:mvn/version "0.4.2"}
